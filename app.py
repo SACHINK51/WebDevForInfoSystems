@@ -2,21 +2,14 @@
 from flask import Flask, render_template, request, redirect, url_for, session, jsonify, flash
 from flask_bcrypt import Bcrypt
 from flask_login import LoginManager, login_required, UserMixin, login_user, logout_user, current_user
-import pyodbc
+import mysql.connector
 from flask_cors import CORS
 import json
 
 # MySQL database connection
-mysql = (
-    r'DRIVER={SQL Server};'
-    r'SERVER=DESKTOP-GER7MB4\SQLEXPRESS;'
-    r'DATABASE=BookStore;'
-    ##r'UID=DESKTOP-GER7MB4\Dell;'
-    ##r'PWD='
-)
-
-# Establishing connection to the database
-conn = pyodbc.connect(mysql)
+mysql = mysql.connector.connect(user='web', password='webPass',
+  host='127.0.0.1',
+  database='BookStore')
 
 # Flask app initialization
 app = Flask(__name__)
@@ -45,7 +38,7 @@ def load_user(userID):
 # Database query function to get user by ID
 def query_user_by_id(userID):
     select_query = 'SELECT * FROM users WHERE userID = ?'
-    cursor = conn.cursor()
+    cursor = mysql.cursor()
     cursor.execute(select_query, (userID,))
     user = cursor.fetchone()
     
@@ -71,9 +64,9 @@ def signup():
             INSERT INTO users (userName, UserType, Password)
             VALUES (?, ?, ?)
         '''
-        cursor = conn.cursor(); #create a connection to the SQL instance
+        cursor = mysql.cursor(); #create a connection to the SQL instance
         cursor.execute(insert_query, (userName, userType, hashed_password))
-        conn.commit()
+        mysql.commit()
         flash("Signup successful! Please login.", "success")
         signup_alert = "Signup successful! Please wait a moment."
         return render_template('signup.html', signup_alert=signup_alert)
@@ -90,7 +83,7 @@ def login():
 
         # Check if the user exists and the password is correct
         select_query = 'SELECT * FROM users WHERE userName = ? AND userType = ?'
-        cursor = conn.cursor(); #create a connection to the SQL instance
+        cursor = mysql.cursor(); #create a connection to the SQL instance
         cursor.execute(select_query, (userName, userType))
         user = cursor.fetchone()
         if user and bcrypt.check_password_hash(user[3], password):
