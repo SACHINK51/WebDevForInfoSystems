@@ -37,7 +37,7 @@ def load_user(userID):
 
 # Database query function to get user by ID
 def query_user_by_id(userID):
-    select_query = 'SELECT * FROM users WHERE userID = ?'
+    select_query = 'SELECT * FROM users WHERE userID = %s'
     cursor = mysql.cursor()
     cursor.execute(select_query, (userID,))
     user = cursor.fetchone()
@@ -190,7 +190,7 @@ def add_book():
                 # Insert product into the Product table
                 insert_query = '''
                     INSERT INTO Book (bookName, price, rating, quantity, bookDescription, userID)
-                    VALUES (?, ?, ?, ?, ?, ?)
+                    VALUES (%s, %s, %s, %s, %s, %s)
                 '''
                 cursor = conn.cursor()
                 cursor.execute(insert_query, (bookName, price, rating, quantity, bookDescription, userID))
@@ -219,8 +219,8 @@ def update_book(book_id):
                 # Update product in the Product table
                 update_query = '''
                     UPDATE Book
-                    SET bookName = ?, price = ?, rating = ?, quantity = ?, bookDescription = ?
-                    WHERE bookID = ?;
+                    SET bookName = %s, price = %s, rating = %s, quantity = %s, bookDescription = %s
+                    WHERE bookID = %s;
                 '''
                 cursor = conn.cursor()
                 resp = cursor.execute(update_query, (bookName, price, rating, quantity, bookDescription, bookID))
@@ -239,7 +239,7 @@ def delete_book(book_id):
         try:
             if request.method == 'DELETE':
                 delete_query = '''
-                    DELETE FROM Book WHERE bookID = ?
+                    DELETE FROM Book WHERE bookID = %s
                 '''
                 cursor = conn.cursor()
                 cursor.execute(delete_query, (book_id,))
@@ -294,8 +294,8 @@ def search_method(search_term):
         SELECT b.*, u.userName
         FROM Book b
         JOIN users u ON b.userID = u.userID
-        WHERE n.bookName LIKE ?
-            OR b.bookDescription LIKE ?
+        WHERE n.bookName LIKE %s
+            OR b.bookDescription LIKE %s
         '''
         cursor.execute(query, ('%'+ search_term + '%', '%' + search_term + '%'))
         results = cursor.fetchall()
