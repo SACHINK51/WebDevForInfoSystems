@@ -313,10 +313,6 @@ def search_method(search_term):
         return jsonify(books), 200
     else:
         return 'Access denied. You are not a customer.'
-    
       
 if __name__ == "__main__":
-    app.run(host='127.0.0.1', port=8080)
-
-##if __name__ == "__main__":
-  ##app.run(host='0.0.0.0',port='8080', ssl_context=('cert.pem', 'privkey.pem')) #Run the flask app at port 8080
+  app.run(host='0.0.0.0',port='8080', ssl_context=('cert.pem', 'privkey.pem')) #Run the flask app at port 8080
