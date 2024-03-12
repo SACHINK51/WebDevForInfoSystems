@@ -1,0 +1,282 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Customer Dashboard</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f4f4f4;
+            margin: 0;
+            padding: 0;
+        }
+
+        header {
+            background-color: #333;
+            color: #fff;
+            padding: 10px;
+            text-align: center;
+        }
+
+        .book-container, #bookCardsContainer {
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: flex-start; 
+            padding-left: 20px;
+            padding-right: 20px;
+        }
+
+        .book-card {
+            border: 1px solid #ddd;
+            border-radius: 8px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+            margin: 10px;
+            padding: 15px;
+            width: 300px;
+            background-color: #fff;
+            text-align: center;
+        }
+
+        .book-name {
+            font-size: 1.2em;
+            font-weight: bold;
+            margin-bottom: 10px;
+            display: flex;
+            justify-content: space-between;
+        }
+
+        .book-name-span{
+            padding: 5px;
+            flex-grow: 1;
+        }
+
+        .book-rating{
+            background-color: #ff0606;
+            padding: 6px;
+            color: #fff;
+            border-radius: 5px;
+            font-size: small;
+        }
+
+        .book-price {
+            color: #007bff;
+            font-size: 1.1em;
+            margin-bottom: 10px;
+        }
+
+        book-quantity {
+            color: #007bff;
+            font-size: 1.1em;
+            margin-bottom: 10px;
+        }
+
+        .book-description {
+            font-size: 1em;
+            margin-bottom: 10px;
+        }
+
+        .add-to-cart-btn {
+            background-color: #007bff;
+            color: #fff;
+            border: none;
+            padding: 8px 16px;
+            border-radius: 5px;
+            cursor: pointer;
+            margin-top: 10px; /* Adjust as needed */
+        }
+
+        .add-to-cart-btn:hover {
+            background-color: #0056b3;
+        }
+
+        .user-name {
+            font-size: 1em;
+            color: #333;
+            margin-top: 5px;
+        }
+
+        .logout-button {
+            margin-top: 20px;
+            text-align: center;
+        }
+
+        .logout-button button {
+            background-color: #d9534f;
+            color: #fff;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 5px;
+            cursor: pointer;
+        }
+        .search-bar {
+            margin-top: 20px;
+            text-align: center;
+        }
+
+        .search-bar input {
+            padding: 8px;
+            margin-right: 10px;
+        }
+
+        .search-bar button {
+            background-color: #007bff;
+            color: #fff;
+            border: none;
+            padding: 8px 16px;
+            border-radius: 5px;
+            cursor: pointer;
+        }
+        #labelForFilterBox{
+            margin-left: 5%;
+        }
+        #filterDiv{
+            padding: 20px;
+        }
+        #filterBox{
+            padding: 6px;
+        }
+        .displayNone{
+            display:none;
+        }
+    </style>
+</head>
+<body>
+    <header>
+        <h1>Welcome, {{ session['userName'] }}</h1>
+        <div class="logout-button">
+            <form action="{{ url_for('logout') }}" method="post">
+                <button type="submit">Logout</button>
+            </form>
+        </div>
+    </header>
+    <div class="search-bar">
+        <input type="text" id="searchInput" placeholder="Search...">
+        <button type="button" onclick="searchMethod()">Search</button>
+    </div>
+    <div id="filterDiv">
+        <label id = "labelForFilterBox" for="filterBox">Filter : </label>
+        <select id="filterBox" name="userType" onchange=sortMethod(this)>
+            <option value="bookID">Popularity</option>
+            <option value="priceLTH">Price (Low to High)</option>
+            <option value="priceHTL">Price (High to Low)</option>
+            <option value="ratingLTH">Rating (Low to High)</option>
+            <option value="ratingHTL">Rating (High to Low)</option>
+        </select>
+    </div>
+    <div id="bookCardsContainer"></div>
+    <div class="book-container">
+        {% for book in books %}
+	    <div class="book-card">
+	        <div class="book-name">
+	            <span class="book-name-span">{{ book['BookName'] }}</span>
+	            <span class="book-rating">{{ book['Rating'] }} ★</span>
+	        </div>
+	        <div class="book-price">${{ book['Price'] }}</div>
+            <div class="book-quantity">${{ book['Quantity'] }}</div>
+            <!--<div class="book-quantity">
+                <label for="quantity{{ book['bookID'] }}">Quantity:</label>
+                <input type="number" min="1" id="quantity{{ book['bookID'] }}" name="quantity" value="1" required>
+            </div>-->
+	        <div class="book-description">{{ book['BookDescription'] }}</div>
+	        <div class="user-name">Supplier: {{ book['userName'] }}</div>
+            <!-- Add to Cart button -->
+            <button onclick="addToCart('{{ book.BookName }}', '{{ book.Price }}')">Add to Cart</button>
+	    </div>
+	{% endfor %}
+
+    </div>
+    <script>
+        function searchMethod() {
+            const searchTerm = document.getElementById('searchInput').value;
+            if(searchTerm=="") {
+                if (document.getElementById('bookCardsContainer').innerHTML!=null) {
+                    document.getElementById('bookCardsContainer').innerHTML = '';
+                }
+            console.log('Search term is empty. Please enter a valid search term.');
+            document.querySelector('.book-container').classList.remove('displayNone');
+            return;	    
+            }
+            fetch(`/search/${encodeURIComponent(searchTerm)}`, {
+            method: 'GET',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            }).then(response => {
+                if (!response.ok) {
+                    throw new Error(`HTTP error! Status: ${response.status}`);
+                }
+            return response.json();
+            }).then(data => {
+            displaySearchResults(data);
+            })
+            .catch(error => {
+                console.error('Error:', error);
+            });
+        }
+      
+        function sortMethod(select){
+            const filterValue = document.getElementById('filterBox').value;
+            console.log(filterValue);
+
+            fetch(`/filter/${encodeURIComponent(filterValue)}`, {
+            method: 'GET',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            })
+            .then(response => {
+                if (!response.ok) {
+                    throw new Error(`HTTP error! Status: ${response.status}`);
+                }
+            return response.json();
+            })
+            .then(data => {
+                console.log('data',data);
+            displaySearchResults(data);
+            })
+            .catch(error => {
+                console.error('Error:', error);
+            });
+        }
+
+	function displaySearchResults(results) {
+	
+	    console.log('results', results)
+	    if (document.getElementById('bookCardsContainer').innerHTML!=null) {
+	    	document.getElementById('bookCardsContainer').innerHTML = '';
+	    }
+	    if(results!='') {
+            console.log('results are not empty', results)
+            document.querySelector('.book-container').classList.add('displayNone');
+            if (results && results.length > 0) {
+                results.forEach(book => {
+                    console.log(book)
+                    var el = `<div class="book-card">
+                        <div class="book-name"><span class="book-name-span">${book.BookName}</span> 
+                            <span class="book-rating">${book.Rating} ★</span></div>
+                        <div class="book-price">${book.Price}</div>
+                        <div class="book-quantity">${book.Quantity}</div>
+                        <div class="book-description">${book.BookDescription}</div>
+                        <div class="user-name">Supplier: ${book.userName}</div>
+                    </div>`
+                document.getElementById('bookCardsContainer').innerHTML += el;
+                });
+            } else {
+            document.getElementById('bookCardsContainer').textContent = 'No books found.';
+            }
+        } else {
+            console.log('results are empty', results)
+            document.getElementById('bookCardsContainer').textContent = 'No books found.';
+            document.querySelector('.book-container').classList.add('displayNone');
+	    }
+	}
+
+    // Function to add a book to the cart
+    function addToCart(bookName, price) {
+        const message = `${bookName} has been added to cart. Price: ${price}`;
+        alert(message);
+    }
+    </script>
+</body>
+</html>

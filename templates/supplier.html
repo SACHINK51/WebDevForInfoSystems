@@ -1,0 +1,147 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Supplier Dashboard</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f4f4f4;
+            margin: 0;
+            padding: 0;
+        }
+
+        header {
+            background-color: #333;
+            color: #fff;
+            padding: 10px;
+            text-align: center;
+        }
+
+        .add-book-form, .book-container {
+            margin-top: 20px;
+            text-align: center;
+        }
+
+        .add-book-form input, .book-container input {
+            padding: 8px;
+            margin-right: 10px;
+        }
+
+        .add-book-form button, .book-container button {
+            background-color: #28a745;
+            color: #fff;
+            border: none;
+            padding: 8px 16px;
+            border-radius: 5px;
+            cursor: pointer;
+        }
+        .logout-button {
+            margin-top: 20px;
+            text-align: center;
+        }
+
+        .logout-button button {
+            background-color: #d9534f;
+            color: #fff;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 5px;
+            cursor: pointer;
+        }
+    </style>
+</head>
+<body>
+    <header>
+        <h1>Welcome, {{ session['userName'] }}</h1>
+        <div class="logout-button">
+            <form action="{{ url_for('logout') }}" method="post">
+                <button type="submit">Logout</button>
+            </form>
+        </div>
+    </header>
+    <div class="add-book-form" >
+        <form class="formHead" id="addBookForm" action="/add_book" method="POST">
+            <input type="text" id="addBookName" name="bookName" placeholder="Book Name" required>
+            <input type="number" min="1" step="any" id="addBookPrice" name="price" placeholder="Price" required>
+            <input type="number" min="1" step="any" id="addQuantity" name="quantity" placeholder="Quantity" required>
+            <input type="number" min="0" max="5" step="any" id="addBookRating" name="rating" placeholder="rating" required>
+            <input type="text" id="addBookDescription" name="bookDescription" placeholder="Book Description" required>
+            <button type="submit" name="submit">Add Book</button>
+        </form>
+    </div>
+    <div class="book-container">
+        {% for book in books %}
+        <form class="formHead" id="updateForm{{book['bookID']}}">
+            <input type="text" id="bookName{{book['bookID']}}" name="bookName" placeholder="Book Name" value="{{ book['BookName'] }}" required readonly>
+            <input type="number" min="1" step="any" id="bookPrice{{book['bookID']}}" name="price" placeholder="Price" value="{{ book['Price'] }}" required readonly>
+            <input type="number" min="1" step="any" id="bookQuantity{{book['bookID']}}" name="quantity" placeholder="Quantity" value="{{ book['Quantity'] }}" required readonly>
+            <input type="number" min="0" max="5" step="any" id="bookRating{{book['bookID']}}" name="rating" placeholder="rating" value="{{ book['Rating'] }}" required readonly>
+            <input type="text" id="bookDescription{{book['bookID']}}" name="bookDescription" placeholder="Book Description" value="{{ book['BookDescription'] }}" required readonly>
+            <button type="button" id="updateButton{{book['bookID']}}" name="submit" onclick="updateMethod('{{ book.bookID }}')">edit</button>
+            <button type="button" name="submit" onclick="deleteMethod('{{ book.bookID }}')">delete</button>
+        </form>
+        {% endfor %}
+    </div>
+    <script>
+        function updateMethod(bookID){
+            if(document.getElementById(`updateButton${bookID}`).innerText=='update'){
+                document.getElementById(`bookName${bookID}`).setAttribute("readonly","readonly");
+                document.getElementById(`bookPrice${bookID}`).setAttribute("readonly","readonly");
+                document.getElementById(`bookQuantity${bookID}`).setAttribute("readonly","readonly");
+                document.getElementById(`bookRating${bookID}`).setAttribute("readonly","readonly");
+                document.getElementById(`bookDescription${bookID}`).setAttribute("readonly","readonly");
+                const updatedBookName = document.getElementById(`bookName${bookID}`).value;
+                const updatedBookPrice = document.getElementById(`bookPrice${bookID}`).value;
+                const updatedBookQuantity = document.getElementById(`bookQuantity${bookID}`).value;
+                const updatedBookRating = document.getElementById(`bookRating${bookID}`).value;
+                const updatedBookDescription = document.getElementById(`bookDescription${bookID}`).value;
+
+                // Make a request to the Python API for updating the book
+                fetch(`/update_book/${bookID}`, {
+                    method: 'PUT',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({
+                        new_book_name: updatedBookName,
+                        new_price: updatedBookPrice,
+                        new_quantity: updatedBookQuantity,
+                        new_rating: updatedBookRating,
+                        new_book_description: updatedBookDescription,
+                    }),
+                })
+                .then(response => {
+                    if(response.status==200){
+                    window.location.reload()
+                }
+                });
+                document.getElementById(`updateButton${bookID}`).innerText='edit';
+            }
+            else{
+                document.getElementById(`updateButton${bookID}`).innerText='update'
+                document.getElementById(`bookName${bookID}`).removeAttribute("readonly");
+                document.getElementById(`bookPrice${bookID}`).removeAttribute("readonly");
+                document.getElementById(`bookQuantity${bookID}`).removeAttribute("readonly");
+                document.getElementById(`bookRating${bookID}`).removeAttribute("readonly");
+                document.getElementById(`bookDescription${bookID}`).removeAttribute("readonly");
+            }
+        }
+        function deleteMethod(bookID){
+            fetch(`/delete_book/${bookID}`, {
+                method: 'DELETE',
+                headers: {
+                    'Content-Type': 'application/json',
+                }
+            })
+            .then(response => {
+               if(response.status==200){
+                window.location.reload()
+               }
+            });
+
+        }        
+    </script>
+</body>
+</html>
