@@ -62,7 +62,7 @@ def signup():
         # Insert user details into the database
         insert_query = '''
             INSERT INTO users (userName, UserType, Password)
-            VALUES (?, ?, ?)
+            VALUES (%s, %s, %s)
         '''
         cursor = mysql.cursor(); #create a connection to the SQL instance
         cursor.execute(insert_query, (userName, userType, hashed_password))
@@ -82,7 +82,7 @@ def login():
         password = request.form['password']
 
         # Check if the user exists and the password is correct
-        select_query = 'SELECT * FROM users WHERE userName = ? AND userType = ?'
+        select_query = 'SELECT * FROM users WHERE userName = %s AND userType = %s'
         cursor = mysql.cursor(); #create a connection to the SQL instance
         cursor.execute(select_query, (userName, userType))
         user = cursor.fetchone()
@@ -133,7 +133,7 @@ def customer_dashboard():
 def supplier_dashboard():
     if current_user.is_authenticated and current_user.userType == "Supplier":
         cur = conn.cursor()
-        cur.execute('''SELECT * FROM Book WHERE userID = ?''', (session['userID'],))
+        cur.execute('''SELECT * FROM Book WHERE userID = %s''', (session['userID'],))
         results  = cur.fetchall()
         books = []
         for row in results :
