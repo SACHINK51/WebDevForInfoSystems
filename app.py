@@ -133,7 +133,7 @@ def customer_dashboard():
 @login_required
 def supplier_dashboard():
     if current_user.is_authenticated and current_user.userType == "Supplier":
-        cur = conn.cursor()
+        cur = mysql.cursor()
         cur.execute('''SELECT * FROM Book WHERE userID = %s''', (session['userID'],))
         results  = cur.fetchall()
         books = []
