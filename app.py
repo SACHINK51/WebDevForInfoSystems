@@ -87,11 +87,11 @@ def login():
         cursor.execute(select_query, (userName, userType))
         user = cursor.fetchone()
         print(user[0],user[1],user[2],user[3])
-        if user and bcrypt.check_password_hash(user[3], password):
+        if user and bcrypt.check_password_hash(user[2], password):
             # Set user information in the session
-            session['userID'] = user[0]
-            session['userName'] = user[1]
-            session['userType'] = user[2]
+            session['userID'] = user[3]
+            session['userName'] = user[0]
+            session['userType'] = user[1]
 
             login_user(User(user[0], user[1], user[2]))
 
