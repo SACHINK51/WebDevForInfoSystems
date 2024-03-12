@@ -109,7 +109,7 @@ def login():
 @login_required
 def customer_dashboard():
     if current_user.is_authenticated and current_user.userType == "Customer":
-        cur = conn.cursor()
+        cur = mysql.cursor()
         cur.execute('''SELECT b.*, u.userName FROM Book b JOIN users u ON b.userID = u.userID''')
         results  = cur.fetchall()
         books = []
@@ -192,7 +192,7 @@ def add_book():
                     INSERT INTO Book (bookName, price, rating, quantity, bookDescription, userID)
                     VALUES (%s, %s, %s, %s, %s, %s)
                 '''
-                cursor = conn.cursor()
+                cursor = mysql.cursor()
                 cursor.execute(insert_query, (bookName, price, rating, quantity, bookDescription, userID))
                 conn.commit()
 
@@ -222,7 +222,7 @@ def update_book(book_id):
                     SET bookName = %s, price = %s, rating = %s, quantity = %s, bookDescription = %s
                     WHERE bookID = %s;
                 '''
-                cursor = conn.cursor()
+                cursor = mysql.cursor()
                 resp = cursor.execute(update_query, (bookName, price, rating, quantity, bookDescription, bookID))
                 mysql.commit()
 
@@ -241,9 +241,9 @@ def delete_book(book_id):
                 delete_query = '''
                     DELETE FROM Book WHERE bookID = %s
                 '''
-                cursor = conn.cursor()
+                cursor = mysql.cursor()
                 cursor.execute(delete_query, (book_id,))
-                conn.commit()
+                mysql.commit()
 
                 return jsonify({'message': 'Book deleted successfully'}), 200
 
@@ -255,7 +255,7 @@ def delete_book(book_id):
 @login_required
 def filter_method(filter_value):
     if current_user.is_authenticated and current_user.userType == "Customer":
-        cursor = conn.cursor()
+        cursor = mysql.cursor()
         if(filter_value == "priceLTH"):
             filterQuery='''SELECT b.*, u.userName FROM Book b JOIN users u ON b.userID = u.userID order By price'''
         elif(filter_value == "priceHTL"):
@@ -289,7 +289,7 @@ def filter_method(filter_value):
 @login_required
 def search_method(search_term):
     if current_user.is_authenticated and current_user.userType == "Customer":
-        cursor = conn.cursor()
+        cursor = mysql.cursor()
         query = '''
         SELECT b.*, u.userName
         FROM Book b
