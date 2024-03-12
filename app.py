@@ -86,8 +86,8 @@ def login():
         cursor = mysql.cursor(); #create a connection to the SQL instance
         cursor.execute(select_query, (userName, userType))
         user = cursor.fetchone()
-        print(user)
-        if user and bcrypt.check_password_hash(user[3].encode('utf-8'), password.encode('utf-8')):
+        print(user[0],user[1],user[2],user[3])
+        if user and bcrypt.check_password_hash(user[3], password):
             # Set user information in the session
             session['userID'] = user[0]
             session['userName'] = user[1]
