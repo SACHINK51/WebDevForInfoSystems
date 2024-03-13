@@ -194,7 +194,7 @@ def add_book():
                 '''
                 cursor = mysql.cursor()
                 cursor.execute(insert_query, (bookName, price, rating, quantity, bookDescription, userID))
-                conn.commit()
+                mysql.commit()
 
             return redirect(url_for('supplier_dashboard'))
         except Exception as e:
