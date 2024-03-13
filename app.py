@@ -294,7 +294,7 @@ def search_method(search_term):
         SELECT b.*, u.userName
         FROM Book b
         JOIN users u ON b.userID = u.userID
-        WHERE n.bookName LIKE %s
+        WHERE b.bookName LIKE %s
             OR b.bookDescription LIKE %s
         '''
         cursor.execute(query, ('%'+ search_term + '%', '%' + search_term + '%'))
