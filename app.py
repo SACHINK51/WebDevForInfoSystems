@@ -7,7 +7,7 @@ from flask_cors import CORS
 import json
 
 # Maria database connection
-mariaDB = mariaDB.connector.connect(user='web', pwd='webPass',
+mariaDB = mysql.connector.connect(user='web', pwd='webPass',
   host='127.0.0.1',
   database='BookStore')
 
