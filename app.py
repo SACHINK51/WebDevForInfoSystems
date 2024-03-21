@@ -21,25 +21,25 @@ login_manager.login_view = 'login'
 
 # User class for Flask-Login
 class User(UserMixin):
-    def __init__(self, uID, userName, userType):
-        self.id = uID
+    def __init__(self, userID, userName, userType):
+        self.id = userID
         self.userName = userName
         self.userType = userType
 
 # Loader function for Flask-Login
 @login_manager.user_loader
-def load_user(uID):
-    user = user_by_id_query(uID)
+def load_user(userID):
+    user = user_by_id_query(userID)
     if user:
         return user
     else:
         return None
 
 # Function for database query to obtain user by ID
-def user_by_id_query(uID):
-    sel_query = 'SELECT * FROM users WHERE uID = %s'
+def user_by_id_query(userID):
+    sel_query = 'SELECT * FROM users WHERE userID = %s'
     cur = mysql.cursor()
-    cur.execute(sel_query, (uID,))
+    cur.execute(sel_query, (userID,))
     user = cur.fetchone()
     
     if user:
@@ -89,7 +89,7 @@ def login():
         print(user[0],user[1],user[2],user[3])
         if user and bcrypt.check_password_hash(user[3], password):
             # Set user information in the session
-            session['uID'] = user[0]
+            session['userID'] = user[0]
             session['userName'] = user[1]
             session['userType'] = user[2]
 
@@ -110,7 +110,7 @@ def login():
 def cust_dashboard():
     if current_user.is_authenticated and current_user.userType == "Customer":
         cur = mysql.cursor()
-        cur.execute('''SELECT b.*, u.userName FROM Book b JOIN users u ON b.uID = u.uID''')
+        cur.execute('''SELECT b.*, u.userName FROM Book b JOIN users u ON b.userID = u.userID''')
         res  = cur.fetchall()
         books = []
         for row in res :
@@ -134,7 +134,7 @@ def cust_dashboard():
 def supp_dashboard():
     if current_user.is_authenticated and current_user.userType == "Supplier":
         cur = mysql.cursor()
-        cur.execute('''SELECT * FROM Book WHERE uID = %s''', (session['uID'],))
+        cur.execute('''SELECT * FROM Book WHERE userID = %s''', (session['userID'],))
         res  = cur.fetchall()
         books = []
         for row in res :
@@ -145,7 +145,7 @@ def supp_dashboard():
                 'Rating': row[3],
                 'Quantity': row[4],
                 'BookDescription': row[5],
-                'uID': row[6]
+                'userID': row[6]
             }
             books.append(book)
         return render_template('supplier.html', books=books)
@@ -157,7 +157,7 @@ def supp_dashboard():
 def logout():
     logout_user()
     # Clear session data
-    session.pop('uID', None)
+    session.pop('userID', None)
     session.pop('userName', None)
     session.pop('userType', None)
     return redirect(url_for('login'))
@@ -185,15 +185,15 @@ def add_book():
                 rating = request.form['rating']
                 quantity = request.form['quantity']
                 bookDescription = request.form['bookDescription']
-                uID = session.get('uID')
+                userID = session.get('userID')
                 
                 # Insert book into the Book table
                 ins_query = '''
-                    INSERT INTO Book (bookName, price, rating, quantity, bookDescription, uID)
+                    INSERT INTO Book (bookName, price, rating, quantity, bookDescription, userID)
                     VALUES (%s, %s, %s, %s, %s, %s)
                 '''
                 cur = mysql.cursor()
-                cur.execute(ins_query, (bookName, price, rating, quantity, bookDescription, uID))
+                cur.execute(ins_query, (bookName, price, rating, quantity, bookDescription, userID))
                 mysql.commit()
 
             return redirect(url_for('supp_dashboard'))
@@ -213,7 +213,7 @@ def update_book(book_id):
                 rating = data.get('new_rating')
                 quantity = data.get('new_quantity')
                 bookDescription = data.get('new_book_description')
-                uID = session.get('uID')
+                userID = session.get('userID')
                 bookID = book_id
 
                 # Update book in the Book table
@@ -257,15 +257,15 @@ def filter_method(filter_value):
     if current_user.is_authenticated and current_user.userType == "Customer":
         cur = mysql.cursor()
         if(filter_value == "priceLTH"):
-            filterQuery='''SELECT b.*, u.userName FROM Book b JOIN users u ON b.uID = u.uID order By price'''
+            filterQuery='''SELECT b.*, u.userName FROM Book b JOIN users u ON b.userID = u.userID order By price'''
         elif(filter_value == "priceHTL"):
-            filterQuery='''SELECT b.*, u.userName FROM Book b JOIN users u ON b.uID = u.uID order By price DESC'''
+            filterQuery='''SELECT b.*, u.userName FROM Book b JOIN users u ON b.userID = u.userID order By price DESC'''
         elif(filter_value == "ratingLTH"):
-            filterQuery='''SELECT b.*, u.userName FROM Book b JOIN users u ON b.uID = u.uID order By rating'''
+            filterQuery='''SELECT b.*, u.userName FROM Book b JOIN users u ON b.userID = u.userID order By rating'''
         elif(filter_value == "ratingHTL"):
-            filterQuery='''SELECT b.*, u.userName FROM Book b JOIN users u ON b.uID = u.uID order By rating DESC'''
+            filterQuery='''SELECT b.*, u.userName FROM Book b JOIN users u ON b.userID = u.userID order By rating DESC'''
         else:
-            filterQuery='''SELECT b.*, u.userName FROM Book b JOIN users u ON b.uID = u.uID'''
+            filterQuery='''SELECT b.*, u.userName FROM Book b JOIN users u ON b.userID = u.userID'''
         cur.execute(filterQuery);
         res = cur.fetchall()
         books = []
@@ -293,7 +293,7 @@ def search_method(search_term):
         query = '''
         SELECT b.*, u.userName
         FROM Book b
-        JOIN users u ON b.uID = u.uID
+        JOIN users u ON b.userID = u.userID
         WHERE b.bookName LIKE %s
             OR b.bookDescription LIKE %s
         '''
