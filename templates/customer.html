@@ -153,7 +153,7 @@
 	            <span class="book-rating">{{ book['Rating'] }} ★</span>
 	        </div>
 	        <div class="book-price">${{ book['Price'] }}</div>
-            <div class="book-quantity">${{ book['Quantity'] }}</div>
+            <div class="book-quantity">{{ book['Quantity'] }}</div>
             <!--<div class="book-quantity">
                 <label for="quantity{{ book['bookID'] }}">Quantity:</label>
                 <input type="number" min="1" id="quantity{{ book['bookID'] }}" name="quantity" value="1" required>
@@ -236,7 +236,7 @@
                         <div class="book-name"><span class="book-name-span">${book.BookName}</span> 
                             <span class="book-rating">${book.Rating} ★</span></div>
                         <div class="book-price">${book.Price}</div>
-                        <div class="book-quantity">${book.Quantity}</div>
+                        <div class="book-quantity">{book.Quantity}</div>
                         <div class="book-description">${book.BookDescription}</div>
                         <div class="user-name">Supplier: ${book.userName}</div>
                     </div>`
