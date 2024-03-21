@@ -21,10 +21,10 @@ login_manager.login_view = 'login'
 
 # User class for Flask-Login
 class User(UserMixin):
-    def __init__(self, uID, uName, uType):
+    def __init__(self, uID, userName, userType):
         self.id = uID
-        self.uName = uName
-        self.uType = uType
+        self.userName = userName
+        self.userType = userType
 
 # Loader function for Flask-Login
 @login_manager.user_loader
@@ -52,20 +52,20 @@ def user_by_id_query(uID):
 def signup():
     signup_alert = None
     if request.method == 'POST':
-        uName = request.form['uName']
-        uType = request.form['uType']
-        pwd = request.form['pwd']
+        userName = request.form['userName']
+        userType = request.form['userType']
+        password = request.form['password']
 
         # Before storing the password, hash it.
-        hashed_pwd = bcrypt.generate_pwd_hash(pwd)
+        hashed_password = bcrypt.generate_password_hash(password)
 
         # Add user information to the database.
         ins_query = '''
-            INSERT INTO users (uName, uType, pwd)
+            INSERT INTO users (userName, userType, password)
             VALUES (%s, %s, %s)
         '''
         cur = mysql.cur(); #create a connection to the SQL instance
-        cur.execute(ins_query, (uName, uType, hashed_pwd))
+        cur.execute(ins_query, (userName, userType, hashed_password))
         mysql.commit()
         flash("User registration successful! Please sign in.", "success")
         signup_alert = "User registration successful! Please wait a moment."
@@ -77,30 +77,30 @@ def signup():
 @app.route('/login', methods=['GET', 'POST'])
 def login():
     if request.method == 'POST':
-        uName = request.form['uName']
-        uType = request.form['uType']
-        pwd = request.form['pwd']
+        userName = request.form['userName']
+        userType = request.form['userType']
+        password = request.form['password']
 
         # Verify that the password is correct and the user exists.
-        sel_query = 'SELECT * FROM users WHERE uName = %s AND uType = %s'
+        sel_query = 'SELECT * FROM users WHERE userName = %s AND userType = %s'
         cur = mysql.cur(); #create a connection to the SQL instance
-        cur.execute(sel_query, (uName, uType))
+        cur.execute(sel_query, (userName, userType))
         user = cur.fetchone()
         print(user[0],user[1],user[2],user[3])
-        if user and bcrypt.check_pwd_hash(user[3], pwd):
+        if user and bcrypt.check_password_hash(user[3], password):
             # Set user information in the session
             session['uID'] = user[0]
-            session['uName'] = user[1]
-            session['uType'] = user[2]
+            session['userName'] = user[1]
+            session['userType'] = user[2]
 
             login_user(User(user[0], user[1], user[2]))
 
-            if session['uType'] == "Supplier":
+            if session['userType'] == "Supplier":
                 return redirect(url_for('supp_dashboard'));
             else:
                 return redirect(url_for('cust_dashboard'));
         else:
-            return 'Invalid uName or pwd'
+            return 'Invalid userName or password'
 
     return render_template('login.html')
 
@@ -108,9 +108,9 @@ def login():
 @app.route("/cust_dashboard")
 @login_required
 def cust_dashboard():
-    if current_user.is_authenticated and current_user.uType == "Customer":
+    if current_user.is_authenticated and current_user.userType == "Customer":
         cur = mysql.cur()
-        cur.execute('''SELECT b.*, u.uName FROM Book b JOIN users u ON b.uID = u.uID''')
+        cur.execute('''SELECT b.*, u.userName FROM Book b JOIN users u ON b.uID = u.uID''')
         res  = cur.fetchall()
         books = []
         for row in res :
@@ -121,7 +121,7 @@ def cust_dashboard():
                 'Rating': row[3],
                 'Quantity': row[4],
                 'BookDescription': row[5],
-                'uName': row[6]
+                'userName': row[6]
             }
             books.append(book)
         return render_template('customer.html', books=books)
@@ -132,7 +132,7 @@ def cust_dashboard():
 @app.route("/supp_dashboard")
 @login_required
 def supp_dashboard():
-    if current_user.is_authenticated and current_user.uType == "Supplier":
+    if current_user.is_authenticated and current_user.userType == "Supplier":
         cur = mysql.cur()
         cur.execute('''SELECT * FROM Book WHERE uID = %s''', (session['uID'],))
         res  = cur.fetchall()
@@ -158,15 +158,15 @@ def logout():
     logout_user()
     # Clear session data
     session.pop('uID', None)
-    session.pop('uName', None)
-    session.pop('uType', None)
+    session.pop('userName', None)
+    session.pop('userType', None)
     return redirect(url_for('login'))
 
 # Default route
 @app.route("/") 
 def defaultPage():
     if current_user.is_authenticated:
-        if current_user.uType == "Supplier":
+        if current_user.userType == "Supplier":
             return redirect(url_for('supp_dashboard'))
         else:
             return redirect(url_for('cust_dashboard'))
@@ -177,7 +177,7 @@ def defaultPage():
 @app.route('/add_book', methods=['GET','POST'])
 @login_required
 def add_book():
-    if current_user.uType == "Supplier":
+    if current_user.userType == "Supplier":
         try:
             if request.method == 'POST':
                 bookName = request.form['bookName']
@@ -204,7 +204,7 @@ def add_book():
 @app.route('/update_book/<int:book_id>', methods=['GET','PUT'])
 @login_required
 def update_book(book_id):
-    if current_user.uType == "Supplier":
+    if current_user.userType == "Supplier":
         try:
             if request.method == 'PUT':
                 data = request.get_json()
@@ -235,7 +235,7 @@ def update_book(book_id):
 @app.route('/delete_book/<int:book_id>', methods=['GET','DELETE'])
 @login_required
 def delete_book(book_id):
-    if current_user.uType == "Supplier":
+    if current_user.userType == "Supplier":
         try:
             if request.method == 'DELETE':
                 delete_query = '''
@@ -254,18 +254,18 @@ def delete_book(book_id):
 @app.route('/filter/<filter_value>')
 @login_required
 def filter_method(filter_value):
-    if current_user.is_authenticated and current_user.uType == "Customer":
+    if current_user.is_authenticated and current_user.userType == "Customer":
         cur = mysql.cur()
         if(filter_value == "priceLTH"):
-            filterQuery='''SELECT b.*, u.uName FROM Book b JOIN users u ON b.uID = u.uID order By price'''
+            filterQuery='''SELECT b.*, u.userName FROM Book b JOIN users u ON b.uID = u.uID order By price'''
         elif(filter_value == "priceHTL"):
-            filterQuery='''SELECT b.*, u.uName FROM Book b JOIN users u ON b.uID = u.uID order By price DESC'''
+            filterQuery='''SELECT b.*, u.userName FROM Book b JOIN users u ON b.uID = u.uID order By price DESC'''
         elif(filter_value == "ratingLTH"):
-            filterQuery='''SELECT b.*, u.uName FROM Book b JOIN users u ON b.uID = u.uID order By rating'''
+            filterQuery='''SELECT b.*, u.userName FROM Book b JOIN users u ON b.uID = u.uID order By rating'''
         elif(filter_value == "ratingHTL"):
-            filterQuery='''SELECT b.*, u.uName FROM Book b JOIN users u ON b.uID = u.uID order By rating DESC'''
+            filterQuery='''SELECT b.*, u.userName FROM Book b JOIN users u ON b.uID = u.uID order By rating DESC'''
         else:
-            filterQuery='''SELECT b.*, u.uName FROM Book b JOIN users u ON b.uID = u.uID'''
+            filterQuery='''SELECT b.*, u.userName FROM Book b JOIN users u ON b.uID = u.uID'''
         cur.execute(filterQuery);
         res = cur.fetchall()
         books = []
@@ -277,7 +277,7 @@ def filter_method(filter_value):
                 'Rating': row[3],
                 'Quantity': row[4],
                 'BookDescription': row[5],
-                'uName': row[6]
+                'userName': row[6]
             }
             books.append(book)
         return jsonify(books), 200
@@ -288,10 +288,10 @@ def filter_method(filter_value):
 @app.route('/search/<search_term>')
 @login_required
 def search_method(search_term):
-    if current_user.is_authenticated and current_user.uType == "Customer":
+    if current_user.is_authenticated and current_user.userType == "Customer":
         cur = mysql.cur()
         query = '''
-        SELECT b.*, u.uName
+        SELECT b.*, u.userName
         FROM Book b
         JOIN users u ON b.uID = u.uID
         WHERE b.bookName LIKE %s
@@ -308,7 +308,7 @@ def search_method(search_term):
                 'Rating': row[3],
                 'Quantity': row[4],
                 'BookDescription': row[5],
-                'uName': row[6]
+                'userName': row[6]
             }
             books.append(book)
         return jsonify(books), 200
