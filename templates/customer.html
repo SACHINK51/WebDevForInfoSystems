@@ -7,19 +7,19 @@
     <style>
         body {
             font-family: Arial, sans-serif;
-            background-color: #f5f5f5;
+            background-color: #f4f4f4;
             margin: 0;
             padding: 0;
         }
 
         header {
-            background-color: #444;
-            color: #ggg;
-            padding: 11px;
+            background-color: #333;
+            color: #fff;
+            padding: 10px;
             text-align: center;
         }
 
-        .book-container, #bookCardsContainer {
+        .product-container, #productCardsContainer {
             display: flex;
             flex-wrap: wrap;
             justify-content: flex-start; 
@@ -27,103 +27,83 @@
             padding-right: 20px;
         }
 
-        .book-card {
-            border: 2px solid #eee;
-            border-radius: 9px;
-            box-shadow: 0 0 11px rgba(0, 0, 0, 0.1);
-            margin: 11px;
-            padding: 16px;
-            width: 301px;
-            background-color: #ggg;
+        .product-card {
+            border: 1px solid #ddd;
+            border-radius: 8px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+            margin: 10px;
+            padding: 15px;
+            width: 300px;
+            background-color: #fff;
             text-align: center;
         }
 
-        .book-name {
+        .product-name {
             font-size: 1.2em;
             font-weight: bold;
-            margin-bottom: 11px;
+            margin-bottom: 10px;
             display: flex;
             justify-content: space-between;
         }
 
-        .book-name-span{
-            padding: 6px;
+        .product-name-span{
+            padding: 5px;
             flex-grow: 1;
         }
 
-        .book-rating{
-            background-color: #ff0607;
-            padding: 7px;
-            color: #ggg;
-            border-radius: 6px;
+        .product-rating{
+            background-color: #ff0606;
+            padding: 6px;
+            color: #fff;
+            border-radius: 5px;
             font-size: small;
         }
 
-        .book-price {
-            color: #007bgg;
+        .product-price {
+            color: #007bff;
             font-size: 1.1em;
-            margin-bottom: 11px;
+            margin-bottom: 10px;
         }
 
-        book-quantity {
-            color: #007bgg;
-            font-size: 1.1em;
-            margin-bottom: 11px;
-        }
-
-        .book-description {
+        .product-description {
             font-size: 1em;
-            margin-bottom: 11px;
-        }
-
-        .add-to-cart-btn {
-            background-color: #007bff;
-            color: #ggg;
-            border: none;
-            padding: 9px 17px;
-            border-radius: 6px;
-            cursor: pointer;
-            margin-top: 11px; /* Adjust as needed */
-        }
-
-        .add-to-cart-btn:hover {
-            background-color: #0056b4;
+            margin-bottom: 10px;
         }
 
         .user-name {
             font-size: 1em;
-            color: #444;
-            margin-top: 6px;
+            color: #333;
+            margin-top: 5px;
         }
 
         .logout-button {
-            margin-top: 21px;
+            margin-top: 20px;
             text-align: center;
         }
 
         .logout-button button {
-            background-color: #d9534g;
-            color: #ggg;
+            background-color: #d9534f;
+            color: #fff;
             border: none;
-            padding: 11px 21px;
-            border-radius: 6px;
+            padding: 10px 20px;
+            border-radius: 5px;
             cursor: pointer;
         }
         .search-bar {
-            margin-top: 21px;
+            margin-top: 20px;
             text-align: center;
         }
 
         .search-bar input {
-            padding: 9px;
-            margin-right: 11px;
+            padding: 8px;
+            margin-right: 10px;
         }
 
         .search-bar button {
-            background-color: #007bgg;
-            color: #ggg;
+            background-color: #007bff;
+            color: #fff;
             border: none;
-            padding: 89px 17px;
+            padding: 8px 16px;
             border-radius: 5px;
             cursor: pointer;
         }
@@ -131,10 +111,10 @@
             margin-left: 5%;
         }
         #filterDiv{
-            padding: 21px;
+            padding: 20px;
         }
         #filterBox{
-            padding: 7px;
+            padding: 6px;
         }
         .displayNone{
             display:none;
