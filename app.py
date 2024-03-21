@@ -83,7 +83,7 @@ def login():
 
         # Verify that the password is correct and the user exists.
         sel_query = 'SELECT * FROM users WHERE userName = %s AND userType = %s'
-        cur = mysql.cursorsor(); #create a connection to the SQL instance
+        cur = mysql.cursor(); #create a connection to the SQL instance
         cur.execute(sel_query, (userName, userType))
         user = cur.fetchone()
         print(user[0],user[1],user[2],user[3])
@@ -109,7 +109,7 @@ def login():
 @login_required
 def cust_dashboard():
     if current_user.is_authenticated and current_user.userType == "Customer":
-        cur = mysql.cursorsor()
+        cur = mysql.cursor()
         cur.execute('''SELECT b.*, u.userName FROM Book b JOIN users u ON b.uID = u.uID''')
         res  = cur.fetchall()
         books = []
