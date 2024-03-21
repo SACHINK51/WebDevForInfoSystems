@@ -2,7 +2,7 @@
 from flask import Flask, render_template, request, redirect, url_for, session, jsonify, flash
 from flask_bcrypt import Bcrypt
 from flask_login import LoginManager, login_required, UserMixin, login_user, logout_user, current_user
-import mariaDB.connector
+import mysql.connector
 from flask_cors import CORS
 import json
 
