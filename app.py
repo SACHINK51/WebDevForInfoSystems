@@ -7,7 +7,7 @@ from flask_cors import CORS
 import json
 
 # Maria database connection
-mariaDB = mysql.connector.connect(user='web', pwd='webPass',
+mysql = mysql.connector.connect(user='web', pwd='webPass',
   host='127.0.0.1',
   database='BookStore')
 
@@ -38,7 +38,7 @@ def load_user(uID):
 # Function for database query to obtain user by ID
 def user_by_id_query(uID):
     sel_query = 'SELECT * FROM users WHERE uID = %s'
-    cur = mariaDB.cur()
+    cur = mysql.cur()
     cur.execute(sel_query, (uID,))
     user = cur.fetchone()
     
@@ -64,9 +64,9 @@ def signup():
             INSERT INTO users (uName, uType, pwd)
             VALUES (%s, %s, %s)
         '''
-        cur = mariaDB.cur(); #create a connection to the SQL instance
+        cur = mysql.cur(); #create a connection to the SQL instance
         cur.execute(ins_query, (uName, uType, hashed_pwd))
-        mariaDB.commit()
+        mysql.commit()
         flash("User registration successful! Please sign in.", "success")
         signup_alert = "User registration successful! Please wait a moment."
         return render_template('signup.html', signup_alert=signup_alert)
@@ -83,7 +83,7 @@ def login():
 
         # Verify that the password is correct and the user exists.
         sel_query = 'SELECT * FROM users WHERE uName = %s AND uType = %s'
-        cur = mariaDB.cur(); #create a connection to the SQL instance
+        cur = mysql.cur(); #create a connection to the SQL instance
         cur.execute(sel_query, (uName, uType))
         user = cur.fetchone()
         print(user[0],user[1],user[2],user[3])
@@ -109,7 +109,7 @@ def login():
 @login_required
 def cust_dashboard():
     if current_user.is_authenticated and current_user.uType == "Customer":
-        cur = mariaDB.cur()
+        cur = mysql.cur()
         cur.execute('''SELECT b.*, u.uName FROM Book b JOIN users u ON b.uID = u.uID''')
         res  = cur.fetchall()
         books = []
@@ -133,7 +133,7 @@ def cust_dashboard():
 @login_required
 def supp_dashboard():
     if current_user.is_authenticated and current_user.uType == "Supplier":
-        cur = mariaDB.cur()
+        cur = mysql.cur()
         cur.execute('''SELECT * FROM Book WHERE uID = %s''', (session['uID'],))
         res  = cur.fetchall()
         books = []
@@ -192,9 +192,9 @@ def add_book():
                     INSERT INTO Book (bookName, price, rating, quantity, bookDescription, uID)
                     VALUES (%s, %s, %s, %s, %s, %s)
                 '''
-                cur = mariaDB.cur()
+                cur = mysql.cur()
                 cur.execute(ins_query, (bookName, price, rating, quantity, bookDescription, uID))
-                mariaDB.commit()
+                mysql.commit()
 
             return redirect(url_for('supp_dashboard'))
         except Exception as e:
@@ -222,9 +222,9 @@ def update_book(book_id):
                     SET bookName = %s, price = %s, rating = %s, quantity = %s, bookDescription = %s
                     WHERE bookID = %s;
                 '''
-                cur = mariaDB.cur()
+                cur = mysql.cur()
                 resp = cur.execute(update_query, (bookName, price, rating, quantity, bookDescription, bookID))
-                mariaDB.commit()
+                mysql.commit()
 
                 return jsonify({'message': 'Book updated successfully'}), 200
 
@@ -241,9 +241,9 @@ def delete_book(book_id):
                 delete_query = '''
                     DELETE FROM Book WHERE bookID = %s
                 '''
-                cur = mariaDB.cur()
+                cur = mysql.cur()
                 cur.execute(delete_query, (book_id,))
-                mariaDB.commit()
+                mysql.commit()
 
                 return jsonify({'message': 'Book deleted successfully'}), 200
 
@@ -255,7 +255,7 @@ def delete_book(book_id):
 @login_required
 def filter_method(filter_value):
     if current_user.is_authenticated and current_user.uType == "Customer":
-        cur = mariaDB.cur()
+        cur = mysql.cur()
         if(filter_value == "priceLTH"):
             filterQuery='''SELECT b.*, u.uName FROM Book b JOIN users u ON b.uID = u.uID order By price'''
         elif(filter_value == "priceHTL"):
@@ -289,7 +289,7 @@ def filter_method(filter_value):
 @login_required
 def search_method(search_term):
     if current_user.is_authenticated and current_user.uType == "Customer":
-        cur = mariaDB.cur()
+        cur = mysql.cur()
         query = '''
         SELECT b.*, u.uName
         FROM Book b
