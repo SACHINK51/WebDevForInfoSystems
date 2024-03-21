@@ -38,7 +38,7 @@ def load_user(uID):
 # Function for database query to obtain user by ID
 def user_by_id_query(uID):
     sel_query = 'SELECT * FROM users WHERE uID = %s'
-    cur = mysql.cur()
+    cur = mysql.cursor()
     cur.execute(sel_query, (uID,))
     user = cur.fetchone()
     
@@ -64,7 +64,7 @@ def signup():
             INSERT INTO users (userName, userType, password)
             VALUES (%s, %s, %s)
         '''
-        cur = mysql.cur(); #create a connection to the SQL instance
+        cur = mysql.cursor(); #create a connection to the SQL instance
         cur.execute(ins_query, (userName, userType, hashed_password))
         mysql.commit()
         flash("User registration successful! Please sign in.", "success")
@@ -83,7 +83,7 @@ def login():
 
         # Verify that the password is correct and the user exists.
         sel_query = 'SELECT * FROM users WHERE userName = %s AND userType = %s'
-        cur = mysql.cur(); #create a connection to the SQL instance
+        cur = mysql.cursorsor(); #create a connection to the SQL instance
         cur.execute(sel_query, (userName, userType))
         user = cur.fetchone()
         print(user[0],user[1],user[2],user[3])
@@ -109,7 +109,7 @@ def login():
 @login_required
 def cust_dashboard():
     if current_user.is_authenticated and current_user.userType == "Customer":
-        cur = mysql.cur()
+        cur = mysql.cursorsor()
         cur.execute('''SELECT b.*, u.userName FROM Book b JOIN users u ON b.uID = u.uID''')
         res  = cur.fetchall()
         books = []
@@ -133,7 +133,7 @@ def cust_dashboard():
 @login_required
 def supp_dashboard():
     if current_user.is_authenticated and current_user.userType == "Supplier":
-        cur = mysql.cur()
+        cur = mysql.cursor()
         cur.execute('''SELECT * FROM Book WHERE uID = %s''', (session['uID'],))
         res  = cur.fetchall()
         books = []
@@ -192,7 +192,7 @@ def add_book():
                     INSERT INTO Book (bookName, price, rating, quantity, bookDescription, uID)
                     VALUES (%s, %s, %s, %s, %s, %s)
                 '''
-                cur = mysql.cur()
+                cur = mysql.cursor()
                 cur.execute(ins_query, (bookName, price, rating, quantity, bookDescription, uID))
                 mysql.commit()
 
@@ -222,7 +222,7 @@ def update_book(book_id):
                     SET bookName = %s, price = %s, rating = %s, quantity = %s, bookDescription = %s
                     WHERE bookID = %s;
                 '''
-                cur = mysql.cur()
+                cur = mysql.cursor()
                 resp = cur.execute(update_query, (bookName, price, rating, quantity, bookDescription, bookID))
                 mysql.commit()
 
@@ -241,7 +241,7 @@ def delete_book(book_id):
                 delete_query = '''
                     DELETE FROM Book WHERE bookID = %s
                 '''
-                cur = mysql.cur()
+                cur = mysql.cursor()
                 cur.execute(delete_query, (book_id,))
                 mysql.commit()
 
@@ -255,7 +255,7 @@ def delete_book(book_id):
 @login_required
 def filter_method(filter_value):
     if current_user.is_authenticated and current_user.userType == "Customer":
-        cur = mysql.cur()
+        cur = mysql.cursor()
         if(filter_value == "priceLTH"):
             filterQuery='''SELECT b.*, u.userName FROM Book b JOIN users u ON b.uID = u.uID order By price'''
         elif(filter_value == "priceHTL"):
@@ -289,7 +289,7 @@ def filter_method(filter_value):
 @login_required
 def search_method(search_term):
     if current_user.is_authenticated and current_user.userType == "Customer":
-        cur = mysql.cur()
+        cur = mysql.cursor()
         query = '''
         SELECT b.*, u.userName
         FROM Book b
